@@ -16,13 +16,14 @@
 package io.agilehandy.k8s.configmap;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.informers.cache.Lister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,57 +38,46 @@ public class ConfigMapCache {
 
 	private static Logger logger = LoggerFactory.getLogger(ConfigMapCache.class);
 
-	private final Map<String, ConfigMap> cache = new ConcurrentHashMap<>();
+	// set of resourceVersion
+	private final Set<String> cache = new ConcurrentSkipListSet();
 
 	private final KubernetesClient client;
 	private final ConfigMapInformerProperties properties;
+	private final Lister<ConfigMap> lister;
 
 	private boolean synced;
 
-	public ConfigMapCache(KubernetesClient client, ConfigMapInformerProperties properties) {
+	public ConfigMapCache(KubernetesClient client, ConfigMapInformerProperties properties, Lister<ConfigMap> lister) {
 		this.client = client;
 		this.properties = properties;
+		this.lister = lister;
 		synced = false;
 	}
 
 	public boolean isSynced() { return synced; }
 
-	public boolean isNotSeen(ConfigMap newcm) {
-		String version = newcm.getMetadata().getResourceVersion();
-		boolean isNotSeen = false;
-		if (!cache.containsKey(version)) {
-			isNotSeen = true;
-		}
-		return isNotSeen;
+	public boolean exists(ConfigMap cm) {
+		return cache.contains(cm.getMetadata().getResourceVersion());
 	}
 
 	public void removeFromCache(ConfigMap cm) {
-		if (cache.containsKey(cm.getMetadata().getResourceVersion())) {
-			cache.remove(cm.getMetadata().getResourceVersion());
-		}
+		cache.remove(cm.getMetadata().getResourceVersion());
 	}
 
 	public void addToCache(ConfigMap cm) {
-		cache.put(cm.getMetadata().getResourceVersion(), cm);
+		cache.add(cm.getMetadata().getResourceVersion());
 	}
 
 	@PostConstruct
 	private void boostrapCache() {
 		logger.info("Start syncing cache.");
-		client.configMaps()
-				.list()
-				.getItems()
+		lister.list()
 				.stream()
 				.filter(cm -> Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled()))
-				.forEach(cm -> cache.put(cm.getMetadata().getResourceVersion(), cm))
+				.forEach(cm -> cache.add(cm.getMetadata().getResourceVersion()))
 		;
-		synced = true;
 		logger.info("Cache is sync with {} configmaps", cache.size());
-		cache.values().stream().forEach(cm -> logger.info(cm.getMetadata().getName()));
-	}
-
-	public Collection<ConfigMap> getConfigMaps() {
-		return this.cache.values();
+		synced = true;
 	}
 
 }

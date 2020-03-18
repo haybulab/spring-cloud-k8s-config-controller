@@ -38,28 +38,26 @@ public class ConfigMapInformer {
 			LoggerFactory.getLogger(ConfigMapInformer.class);
 
 	private final ConfigMapEventHandler handler;
-	private final SharedIndexInformer<ConfigMap> informer;
-	private final SharedInformerFactory sharedInformerFactory;
+	private final SharedInformerFactory factory;
 
 	public ConfigMapInformer(ConfigMapEventHandler handler
-			, SharedIndexInformer<ConfigMap> informer
 			, SharedInformerFactory factory) {
-		this.informer = informer;
 		this.handler = handler;
-		this.sharedInformerFactory = factory;
+		this.factory = factory;
 	}
 
 	public void run() {
-		logger.info("Informer factory initialized.");
+		SharedIndexInformer<ConfigMap> informer =
+				factory.getExistingSharedIndexInformer(ConfigMap.class);
 		informer.addEventHandler(handler);
 		logger.info("Starting all registered informers");
-		sharedInformerFactory.startAllRegisteredInformers();
+		factory.startAllRegisteredInformers();
 	}
 
 	@PreDestroy
 	public void destroy() {
 		logger.info("Stopping all registered informers");
-		sharedInformerFactory.stopAllRegisteredInformers();
+		factory.stopAllRegisteredInformers();
 	}
 
 }

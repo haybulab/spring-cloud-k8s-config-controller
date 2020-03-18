@@ -45,7 +45,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 	public void onAdd(ConfigMap cm) {
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled())
-				&& cache.isNotSeen(cm)
+				&& !cache.exists(cm)
 		) {
 			cache.addToCache(cm);
 			messenger.publish(cm);
@@ -58,7 +58,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(oldcm, properties.getConfigmapLabelEnabled())
 				&& Util.isSpringConfigMap(newcm, properties.getConfigmapLabelEnabled())
-				&& cache.isNotSeen(newcm)
+				&& !cache.exists(newcm)
 		) {
 			cache.removeFromCache(oldcm);
 			cache.addToCache(newcm);
@@ -71,7 +71,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 	public void onDelete(ConfigMap cm, boolean deletedFinalStateUnknown) {
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled())
-				&& !cache.isNotSeen(cm)
+				&& cache.exists(cm)
 		) {
 			cache.removeFromCache(cm);
 			messenger.publish(cm);

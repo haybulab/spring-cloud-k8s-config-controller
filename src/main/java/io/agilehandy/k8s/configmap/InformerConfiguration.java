@@ -55,18 +55,18 @@ public class InformerConfiguration {
 
 	@Bean
 	public SharedInformerFactory sharedInformerFactory(KubernetesClient client) {
-		return client.informers();
-	}
-
-	@Bean
-	public SharedIndexInformer<ConfigMap> sharedIndexInformer(SharedInformerFactory factory) {
-		return factory.sharedIndexInformerFor(ConfigMap.class
+		SharedInformerFactory factory = client.informers();
+		factory.sharedIndexInformerFor(ConfigMap.class
 				, ConfigMapList.class
 				, properties.getWatcherInterval() * 1000L);
+		return factory;
 	}
 
 	@Bean
-	public Lister<ConfigMap> lister(SharedIndexInformer<ConfigMap> informer, KubernetesClient client) {
+	public Lister<ConfigMap> lister( SharedInformerFactory factory
+			, KubernetesClient client) {
+		SharedIndexInformer<ConfigMap> informer =
+				factory.getExistingSharedIndexInformer(ConfigMap.class);
 		return new Lister(informer.getIndexer(), client.getNamespace());
 	}
 

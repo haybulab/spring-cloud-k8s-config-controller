@@ -74,6 +74,31 @@ public class WebController {
 		return Flux.fromStream(cmModels.stream());
 	}
 
+	@GetMapping("/configmaps/{name}")
+	public Mono<ConfigMapModel> getConfigMapByName(@PathVariable("name") String name) {
+		return this.springEnabledConfigMaps()
+				.filter(model -> model.getName().equalsIgnoreCase(name))
+				.next();
+	}
+
+	@GetMapping("/configmaps/{name}/namespaces/{namespace}")
+	public Mono<ConfigMapModel> getConfigMapByNameAndByNamespace(@PathVariable("name") String name,
+			@PathVariable("namespace") String namespace) {
+		return this.springEnabledConfigMaps()
+				.filter(model -> model.getName().equalsIgnoreCase(name)
+						&& model.getNamespace().equalsIgnoreCase(namespace))
+				.next();
+	}
+
+	@GetMapping("/configmaps/{name}/profiles/{profile}")
+	public Mono<ConfigMapModel> getConfigMapByNameAndByProfile(@PathVariable("name") String name,
+			@PathVariable("profile") String profile) {
+		return this.springEnabledConfigMaps()
+				.filter(model -> model.getName().equalsIgnoreCase(name)
+						&& model.getProfile().equalsIgnoreCase(profile))
+				.next();
+	}
+
 	@GetMapping("/configmaps/{name}/namespaces/{namespace}/profiles/{profile}")
 	public Mono<ConfigMapModel> getConfigMap(@PathVariable("name") String name,
 			@PathVariable("namespace") String namespace,
