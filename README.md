@@ -10,7 +10,7 @@ In this experiment I leveraged Fabric8 Kubernetes-Client library to implement
 a hybrid solution to configure spring-based services running in a K8s cluster. 
 The solution offers a centralized server to cater configuration data while 
 leveraging a shared informer event handler that reacts to ConfigMap resources 
-events in the a clusters namespace.
+events in a clusters namespace to refresh configuration of remote services.
 
 The experiment updates the config module in Spring-Cloud-Kubernetes project to 
 hit a Restful endpoint of the central service to configure a target microservice 
