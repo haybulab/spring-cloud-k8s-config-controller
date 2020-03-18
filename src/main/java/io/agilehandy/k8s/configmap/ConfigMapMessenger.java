@@ -21,6 +21,7 @@ import java.util.Map;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -34,7 +35,8 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ConfigMapMessenger {
 
-	//@Value("${server.port}")
+	@Value("${server.port}")
+	private int port;
 
 	private final RestTemplate restTemplate;
 
@@ -43,7 +45,7 @@ public class ConfigMapMessenger {
 	}
 
 	public void publish(ConfigMap configMap) {
-		String uri = "http://localhost:8080/actuator/bus-refresh";
+		String uri = "http://localhost:"+port+"/actuator/bus-refresh";
 		HttpEntity<Map<String, String>> request =
 				new HttpEntity(configMap.getData(), null);
 		restTemplate.postForLocation(uri, request);
