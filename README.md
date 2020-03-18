@@ -23,6 +23,9 @@ actuator refresh message via a Spring Cloud Bus every time a ConfigMap receives
 an event (updated/deleted). If a remote configured microservice listens on the same bus
 (backed by a rabbitMQ broker in this case), it would get auto-refreshed.
 
+The central service's informer considers only ConfigMaps resources that are labeled with
+`config.spring.io/enabled: "true"` (I plan to change this to be an annotation instead of a label).
+
 This implementation requires running this configuration service and a RabbitMQ broker.
 It needs also remote microservices to include `spring-cloud-starter-bus-amqp` dependency.
 The remote service needs to disable existing `reload` and `enableAPI` options so it
@@ -43,7 +46,6 @@ spring:
         enableK8sController: true
         uri: [service uri]
 ```
-
 
 
 
