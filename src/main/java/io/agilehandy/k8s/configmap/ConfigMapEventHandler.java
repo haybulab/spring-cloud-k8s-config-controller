@@ -43,7 +43,6 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 
 	@Override
 	public void onAdd(ConfigMap cm) {
-		logger.info("onAdd Called...");
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled())
 				&& cache.isNotSeen(cm)
@@ -56,7 +55,6 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 
 	@Override
 	public void onUpdate(ConfigMap oldcm, ConfigMap newcm) {
-		logger.info("onUpdate Called...");
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(oldcm, properties.getConfigmapLabelEnabled())
 				&& Util.isSpringConfigMap(newcm, properties.getConfigmapLabelEnabled())
@@ -71,7 +69,6 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 
 	@Override
 	public void onDelete(ConfigMap cm, boolean deletedFinalStateUnknown) {
-		logger.info("onDelete Called...");
 		if (cache.isSynced()
 				&& Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled())
 				&& !cache.isNotSeen(cm)
