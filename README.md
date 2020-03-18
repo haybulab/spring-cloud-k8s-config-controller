@@ -35,6 +35,8 @@ spring:
   cloud:
     kubernetes:
       enabled: true
+      reload:
+        enabled: false
       config:
         enabled: true
         enableApi: false
