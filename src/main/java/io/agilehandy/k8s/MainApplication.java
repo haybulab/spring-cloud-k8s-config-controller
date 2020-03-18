@@ -2,10 +2,15 @@ package io.agilehandy.k8s;
 
 import io.agilehandy.k8s.configmap.ConfigMapInformer;
 import io.agilehandy.k8s.configmap.ConfigMapInformerProperties;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
+import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
+import io.fabric8.kubernetes.client.informers.cache.Lister;
 
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -27,18 +32,4 @@ public class MainApplication {
 		return args -> configMapInformer.run();
 	}
 
-	@Bean
-	public KubernetesClient client(Config config) {
-		return new DefaultKubernetesClient(config);
-	}
-
-	@Bean
-	public Config config() {
-		return new ConfigBuilder().build();
-	}
-
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
 }

@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.informers.cache.Lister;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,23 +40,33 @@ public class WebController {
 
 	private final ConfigMapCache cache;
 	private final ConfigMapInformerProperties properties;
+	private final Lister<ConfigMap> lister;
 
-	public WebController(ConfigMapCache cache, ConfigMapInformerProperties properties) {
+	public WebController(ConfigMapCache cache, ConfigMapInformerProperties properties, Lister<ConfigMap> lister) {
 		this.cache = cache;
 		this.properties = properties;
+		this.lister = lister;
 	}
 
-	@GetMapping("/cache")
-	public Flux<ConfigMapModel> getConfig() {
-		Collection<ConfigMap> configmaps = cache.getConfigMaps();
-
-		Function<ConfigMap, String> applicationProfileFunc = (ConfigMap cm) ->
+	@GetMapping("/configmaps")
+	public Flux<ConfigMapModel> springEnabledConfigMaps() {
+		Function<ConfigMap, String> getProfileFunc = (ConfigMap cm) ->
 				cm.getMetadata().getLabels().get(properties.getConfigmapLabelProfile()) != null?
 						cm.getMetadata().getLabels().get(properties.getConfigmapLabelProfile()):"default";
 
-		Set<ConfigMapModel> cmModels = configmaps.stream()
+		Predicate<ConfigMap> isSpringEnabledPredicate = (ConfigMap cm) -> {
+			String cfg = cm.getMetadata().getLabels() != null?
+					cm.getMetadata().getLabels().containsKey(properties.getConfigmapLabelEnabled())?
+							cm.getMetadata().getLabels().get(properties.getConfigmapLabelEnabled()):"false"
+					: "false";
+			return Boolean.valueOf(cfg.toLowerCase()).booleanValue();
+		};
+
+		Set<ConfigMapModel> cmModels = lister.list().stream()
+				.filter(isSpringEnabledPredicate::test)
 				.map(cm -> new ConfigMapModel(cm.getMetadata().getName()
-						, applicationProfileFunc.apply(cm)
+						,cm.getMetadata().getNamespace()
+						, getProfileFunc.apply(cm)
 						, cm.getMetadata().getLabels().get(properties.getConfigmapLabelLabel())
 						, cm.getData()))
 				.collect(Collectors.toSet());
@@ -63,31 +74,15 @@ public class WebController {
 		return Flux.fromStream(cmModels.stream());
 	}
 
-	@GetMapping("/cache/config/namespace/{namespace}/name/{name}/profile/{profile}")
+	@GetMapping("/configmaps/{name}/namespaces/{namespace}/profiles/{profile}")
 	public Mono<ConfigMapModel> getConfigMap(@PathVariable("name") String name,
 			@PathVariable("namespace") String namespace,
 			@PathVariable("profile") String profile) {
-
-		Collection<ConfigMap> configmaps = cache.getConfigMaps();
-
-		Function<ConfigMap, String> applicationProfileFunc = (ConfigMap cm) ->
-				cm.getMetadata().getLabels().get(properties.getConfigmapLabelProfile()) != null?
-						cm.getMetadata().getLabels().get(properties.getConfigmapLabelProfile()):"default";
-
-		Predicate<ConfigMap> selected = (ConfigMap cm) ->
-				cm.getMetadata().getName().equalsIgnoreCase(name)
-				&& cm.getMetadata().getNamespace().equalsIgnoreCase(namespace)
-				&& applicationProfileFunc.apply(cm).equalsIgnoreCase(profile);
-
-		ConfigMapModel configmap = configmaps.stream()
-				.filter(cm -> selected.test(cm))
-				.map(cm -> new ConfigMapModel(cm.getMetadata().getName()
-						, applicationProfileFunc.apply(cm)
-						, cm.getMetadata().getLabels().get(properties.getConfigmapLabelLabel())
-						, cm.getData()))
-				.findFirst().orElse(new ConfigMapModel(name, profile))
-				;
-
-		return Mono.just(configmap);
+		return this.springEnabledConfigMaps()
+				.filter(model -> model.getName().equalsIgnoreCase(name)
+								&& model.getNamespace().equalsIgnoreCase(namespace)
+								&& model.getProfile().equalsIgnoreCase(profile))
+				.next();
 	}
+
 }

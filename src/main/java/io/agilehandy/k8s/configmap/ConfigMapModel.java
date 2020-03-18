@@ -27,6 +27,8 @@ public class ConfigMapModel implements Serializable {
 	private String profile;
 	private String label;
 
+	private String namespace;
+
 	private Map<String, String> data;
 
 	public String getProfile() {
@@ -45,15 +47,16 @@ public class ConfigMapModel implements Serializable {
 		this.label = label;
 	}
 
-	public ConfigMapModel(String name, String profile) {
-		this(name, profile, null, null);
+	public ConfigMapModel(String name, String namespace, String profile) {
+		this(name, namespace, profile, null, null);
 	}
 
-	public ConfigMapModel(String name, String profile, String label
+	public ConfigMapModel(String name, String namespace, String profile, String label
 			, Map<String, String> data) {
 		this.name = name;
 		this.data = data;
 		this.profile = profile;
+		this.namespace = namespace;
 		this.label = label;
 	}
 
@@ -71,6 +74,14 @@ public class ConfigMapModel implements Serializable {
 
 	public void setData(Map<String, String> data) {
 		this.data = data;
+	}
+
+	public String getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
 	}
 
 }

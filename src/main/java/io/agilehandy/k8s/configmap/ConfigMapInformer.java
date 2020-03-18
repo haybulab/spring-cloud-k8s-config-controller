@@ -15,7 +15,6 @@
  */
 package io.agilehandy.k8s.configmap;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -35,32 +34,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigMapInformer {
 
-	private static Logger logger = LoggerFactory.getLogger(ConfigMapInformer.class);
+	private static Logger logger =
+			LoggerFactory.getLogger(ConfigMapInformer.class);
 
-	private final ConfigMapInformerProperties properties;
-	private final KubernetesClient client;
 	private final ConfigMapEventHandler handler;
+	private final SharedIndexInformer<ConfigMap> informer;
+	private final SharedInformerFactory sharedInformerFactory;
 
-	private final ConfigMapCache cache;
-	private final ConfigMapMessenger messenger;
-
-	private SharedInformerFactory sharedInformerFactory;
-
-	public ConfigMapInformer(ConfigMapInformerProperties properties, KubernetesClient client, ConfigMapEventHandler handler, ConfigMapCache cache, ConfigMapMessenger messenger) {
-		this.properties = properties;
-		this.client = client;
+	public ConfigMapInformer(ConfigMapEventHandler handler
+			, SharedIndexInformer<ConfigMap> informer
+			, SharedInformerFactory factory) {
+		this.informer = informer;
 		this.handler = handler;
-		this.cache = cache;
-		this.messenger = messenger;
+		this.sharedInformerFactory = factory;
 	}
 
 	public void run() {
-		SharedIndexInformer<ConfigMap> cmInformer =
-				sharedInformerFactory.sharedIndexInformerFor(ConfigMap.class
-						, ConfigMapList.class
-						, properties.getWatcherInterval() * 1000L);
 		logger.info("Informer factory initialized.");
-		cmInformer.addEventHandler(handler);
+		informer.addEventHandler(handler);
 		logger.info("Starting all registered informers");
 		sharedInformerFactory.startAllRegisteredInformers();
 	}
@@ -69,11 +60,6 @@ public class ConfigMapInformer {
 	public void destroy() {
 		logger.info("Stopping all registered informers");
 		sharedInformerFactory.stopAllRegisteredInformers();
-	}
-
-	@PostConstruct
-	public void setup() {
-		sharedInformerFactory = this.client.informers();
 	}
 
 }
