@@ -2,6 +2,9 @@
 spring:
   application:
     name: spring-cloud-k8s-config-controller
+  cloud:
+    bus:
+      enabled: true
 
 k8s:
   informer:
