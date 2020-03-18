@@ -49,7 +49,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 		) {
 			cache.addToCache(cm);
 			messenger.publish(cm);
-			logger.info("{} spring ConfigMap is added", cm.getMetadata().getName());
+			logger.debug("{} spring ConfigMap is added", cm.getMetadata().getName());
 		}
 	}
 
@@ -63,7 +63,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 			cache.removeFromCache(oldcm);
 			cache.addToCache(newcm);
 			messenger.publish(newcm);
-			logger.info("{} spring ConfigMap is updated", oldcm.getMetadata().getName());
+			logger.debug("{} spring ConfigMap is updated", oldcm.getMetadata().getName());
 		}
 	}
 
@@ -75,7 +75,7 @@ public class ConfigMapEventHandler implements ResourceEventHandler<ConfigMap> {
 		) {
 			cache.removeFromCache(cm);
 			messenger.publish(cm);
-			logger.info("{} spring ConfigMap is deleted", cm.getMetadata().getName());
+			logger.debug("{} spring ConfigMap is deleted", cm.getMetadata().getName());
 		}
 	}
 

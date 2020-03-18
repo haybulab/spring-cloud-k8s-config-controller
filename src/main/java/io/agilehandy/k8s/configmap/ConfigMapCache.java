@@ -70,13 +70,13 @@ public class ConfigMapCache {
 
 	@PostConstruct
 	private void boostrapCache() {
-		logger.info("Start syncing cache.");
+		logger.debug("Start syncing cache.");
 		lister.list()
 				.stream()
 				.filter(cm -> Util.isSpringConfigMap(cm, properties.getConfigmapLabelEnabled()))
 				.forEach(cm -> cache.add(cm.getMetadata().getResourceVersion()))
 		;
-		logger.info("Cache is sync with {} configmaps", cache.size());
+		logger.debug("Cache is sync with {} configmaps", cache.size());
 		synced = true;
 	}
 
