@@ -15,11 +15,12 @@ import io.fabric8.kubernetes.client.informers.cache.Lister;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-@SpringBootApplication
+@SpringBootApplication //(exclude = {RabbitAutoConfiguration.class})
 @EnableConfigurationProperties(ConfigMapInformerProperties.class)
 public class MainApplication {
 

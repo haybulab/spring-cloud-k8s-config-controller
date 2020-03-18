@@ -38,12 +38,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class WebController {
 
-	private final ConfigMapCache cache;
 	private final ConfigMapInformerProperties properties;
 	private final Lister<ConfigMap> lister;
 
-	public WebController(ConfigMapCache cache, ConfigMapInformerProperties properties, Lister<ConfigMap> lister) {
-		this.cache = cache;
+	public WebController(ConfigMapInformerProperties properties, Lister<ConfigMap> lister) {
 		this.properties = properties;
 		this.lister = lister;
 	}

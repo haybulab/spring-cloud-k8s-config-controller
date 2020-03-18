@@ -22,10 +22,12 @@ import org.springframework.context.annotation.Import;
 
 /**
  * @author Haytham Mohamed
+ *
+ * Issue exists that prevent conditionally auto-configure RabbitMQ
  **/
 
-@Configuration
-@ConditionalOnProperty(name="k8s.informer.bus",havingValue="true",matchIfMissing=false)
-@Import(RabbitAutoConfiguration.class)
+//@Configuration
+//@ConditionalOnProperty(name="k8s.informer.bus",havingValue="true",matchIfMissing=false)
+//@Import(RabbitAutoConfiguration.class)
 public class RabbitMQConfig {
 }
