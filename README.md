@@ -4,7 +4,7 @@
 
 Fabric8 is a community-maintained Java library that offers a Kubernetes client 
 implementation. Fabric8 Kubernetes-Client offers implementation of K8s
-operator pattern that ports typical features to that offered by client-go library.
+operator pattern that ports (mostly) typical features to that offered by the client-go library.
   
 In this experiment I leveraged Fabric8 Kubernetes-Client library to implement 
 a hybrid solution to configure spring-based services running in a K8s cluster. 
@@ -12,7 +12,7 @@ The solution offers a centralized server to cater configuration data while
 leveraging a shared informer event handler that reacts to ConfigMap resources 
 events in the a clusters namespace.
 
-The experiment update the config module in Spring-Cloud-Kubernetes project to 
+The experiment updates the config module in Spring-Cloud-Kubernetes project to 
 hit a Restful endpoint of the central service to configure a target microservice 
 with a ConfigMap that has a name matches the name of the microservice 
 (as defined by spring.application.name property). a ConfigMap Lister helps to 
