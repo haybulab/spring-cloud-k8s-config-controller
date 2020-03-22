@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.client.informers.cache.Lister;
@@ -60,16 +61,15 @@ public class WebController {
 			return Boolean.valueOf(cfg.toLowerCase()).booleanValue();
 		};
 
-		Set<ConfigMapModel> cmModels = lister.list().stream()
+		return Flux.fromStream(
+				lister.list().stream()
 				.filter(isSpringEnabledPredicate::test)
 				.map(cm -> new ConfigMapModel(cm.getMetadata().getName()
 						,cm.getMetadata().getNamespace()
 						, getProfileFunc.apply(cm)
 						, cm.getMetadata().getLabels().get(properties.getConfigmapLabelLabel())
 						, cm.getData()))
-				.collect(Collectors.toSet());
-
-		return Flux.fromStream(cmModels.stream());
+		);
 	}
 
 	@GetMapping("/configmaps/{name}")
